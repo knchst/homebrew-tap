@@ -22,8 +22,8 @@ with zipfile.ZipFile(args.wheel) as archive:
     metadata_name = next(n for n in archive.namelist() if n.endswith('.dist-info/METADATA'))
     metadata = email.parser.BytesParser().parsebytes(archive.read(metadata_name))
 version = metadata['Version']
-if metadata['Name'].lower() != 'anymessage' or version != '0.2.0' or args.wheel.name != 'anymessage-0.2.0-py3-none-any.whl':
-    raise ValueError('Expected the AnyMessage 0.2.0 release wheel')
+if metadata['Name'].lower() != 'anymessage' or args.wheel.name != f'anymessage-{version}-py3-none-any.whl':
+    raise ValueError('Expected the AnyMessage universal release wheel')
 if packages['anymessage']['version'] != version:
     raise ValueError('The release wheel and lock versions differ')
 
@@ -130,7 +130,7 @@ out = f'''class Anymessage < Formula
 for name in shared:
     out += resource(name, resources[name]['arm64'], '  ') + '\n'
 out += '''  def install
-    venv = virtualenv_create(libexec, (Formula["python@3.13"].opt_bin/"python3.13").to_s)
+    venv = virtualenv_create(libexec, (Formula["python@3.13"].opt_bin/"python3.13").to_s, system_site_packages: false)
     resources.each do |r|
       r.stage do
         venv.pip_install Pathname.pwd/r.downloader.basename

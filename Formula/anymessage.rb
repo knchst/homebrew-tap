@@ -4,7 +4,7 @@ class Anymessage < Formula
   desc "Read-only local messaging MCP server"
   homepage "https://github.com/knchst/AnyMessage"
   url "https://github.com/knchst/AnyMessage/releases/download/v0.2.0/anymessage-0.2.0-py3-none-any.whl", using: :nounzip
-  sha256 "d8463dd53f6f079d6b089649573dd314a17fc787e6502b8ae24dc25822c08587"
+  sha256 "69283f6633d59114da4cd5cc4f4e33bb56b9d815708679f9c80eb8cbd355da3d"
   license "MIT"
 
   depends_on macos: :sonoma
@@ -168,7 +168,7 @@ class Anymessage < Formula
   end
 
   def install
-    venv = virtualenv_create(libexec, (Formula["python@3.13"].opt_bin/"python3.13").to_s)
+    venv = virtualenv_create(libexec, (Formula["python@3.13"].opt_bin/"python3.13").to_s, system_site_packages: false)
     resources.each do |r|
       r.stage do
         venv.pip_install Pathname.pwd/r.downloader.basename
