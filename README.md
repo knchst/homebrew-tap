@@ -10,6 +10,8 @@ anymessage doctor
 
 The MCP server exposes read-only message search and attachment access through six tools: `status`, `list_conversations`, `get_messages`, `search_messages`, `list_attachments`, and `read_attachment`.
 
+Attachment reads use locally cached files only. They extract text from PDF, DOCX, XLSX, and PPTX files and return images as JPEG. They do not run OCR or download attachments from the network.
+
 To print an MCP client configuration without changing a client file, run `anymessage mcp config --format json`. For client setup and privacy details, see the [AnyMessage documentation](https://github.com/knchst/AnyMessage).
 
 ## Maintain the formula

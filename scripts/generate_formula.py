@@ -158,6 +158,8 @@ out += '''  def install
     system libexec/"bin/python", "-c", <<~PYTHON, bin/"anymessage"
       import asyncio
       import sys
+      import pypdf
+      from PIL import Image
       from mcp import ClientSession, StdioServerParameters
       from mcp.client.stdio import stdio_client
 
