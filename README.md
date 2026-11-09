@@ -18,4 +18,4 @@ Generate the formula from the release wheel and the matching `uv.lock` using Pyt
 python3 scripts/generate_formula.py --lock /path/to/uv.lock --wheel /path/to/anymessage-0.2.0-py3-none-any.whl
 ```
 
-The generator checks each wheel URL and checksum against PyPI and the lock. Publish the release wheel at the URL in the formula before installing it. The GitHub Actions workflow links the checkout as a tap, installs the formula, and runs `brew test`.
+The generator checks each wheel URL and checksum against PyPI and the lock. Publish the release wheel at the URL in the formula before installing it. The GitHub Actions workflow uses a macOS 26 runner to link the checkout as a tap, install the formula, and run `brew test`.
