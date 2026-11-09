@@ -4,7 +4,7 @@ class Anymessage < Formula
   desc "Read-only local messaging MCP server"
   homepage "https://github.com/knchst/AnyMessage"
   url "https://github.com/knchst/AnyMessage/releases/download/v0.3.0/anymessage-0.3.0-py3-none-any.whl", using: :nounzip
-  sha256 "9857aba4e07b399eb77a3e13973b96199a3a94be7920afe4f2df4b074308e860"
+  sha256 "bc54af96b8e3f50b403b8ce0ac5545663616d8e7381ef50091b8ba242d0eb181"
   license "MIT"
 
   depends_on macos: :sonoma
