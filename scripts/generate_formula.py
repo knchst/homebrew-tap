@@ -152,6 +152,7 @@ out += '''  def install
     assert_match version.to_s, shell_output("#{bin}/anymessage --version")
     doctor = JSON.parse(shell_output("#{bin}/anymessage doctor --json", 1))
     assert_equal false, doctor.fetch("ready")
+    assert_equal "data_missing", doctor.fetch("source").fetch("state")
     config = JSON.parse(shell_output("#{bin}/anymessage mcp config --format json"))
     assert_equal ["mcp"], config.fetch("mcpServers").fetch("AnyMessage").fetch("args")
     system libexec/"bin/python", "-c", <<~PYTHON, bin/"anymessage"
@@ -165,7 +166,8 @@ out += '''  def install
               async with ClientSession(read, write) as session:
                   await session.initialize()
                   tools = await session.list_tools()
-                  assert {tool.name for tool in tools.tools} == {"status", "list_conversations", "get_messages", "search_messages"}
+                  assert {tool.name for tool in tools.tools} == {"status", "list_conversations", "get_messages", "search_messages", "list_attachments", "read_attachment"}
+                  assert all(tool.annotations and tool.annotations.readOnlyHint and tool.annotations.openWorldHint is False for tool in tools.tools)
                   result = await session.call_tool("status", {})
                   assert not result.isError
 
