@@ -1,0 +1,18 @@
+name: Test formula
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: macos-15
+    env:
+      HOMEBREW_DEVELOPER: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - run: test "$(uname -m)" = arm64
+      - run: brew tap --custom-remote knchst/tap "$GITHUB_WORKSPACE"
+      - run: brew install --build-from-source knchst/tap/anymessage
+      - run: brew test knchst/tap/anymessage
