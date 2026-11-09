@@ -3,8 +3,8 @@ class Anymessage < Formula
 
   desc "Read-only local messaging MCP server"
   homepage "https://github.com/knchst/AnyMessage"
-  url "https://github.com/knchst/AnyMessage/releases/download/v0.2.0/anymessage-0.2.0-py3-none-any.whl", using: :nounzip
-  sha256 "69283f6633d59114da4cd5cc4f4e33bb56b9d815708679f9c80eb8cbd355da3d"
+  url "https://github.com/knchst/AnyMessage/releases/download/v0.3.0/anymessage-0.3.0-py3-none-any.whl", using: :nounzip
+  sha256 "bc54af96b8e3f50b403b8ce0ac5545663616d8e7381ef50091b8ba242d0eb181"
   license "MIT"
 
   depends_on macos: :sonoma
@@ -87,6 +87,11 @@ class Anymessage < Formula
     sha256 "666edb5009503e1047c9d60346a756f94b261f05cc2625f23d41c728ffc484d0"
   end
 
+  resource "pillow" do
+    url "https://files.pythonhosted.org/packages/10/76/8803c13605b763d33d156c4678fc77f8443389c0c51c8aef707bb02015f4/pillow-12.3.0-cp313-cp313-macosx_11_0_arm64.whl", using: :nounzip
+    sha256 "d69141514cc30b774ceea5e3ed3a6635c8d8a96edf664689b890f4089111fb35"
+  end
+
   resource "pycparser" do
     url "https://files.pythonhosted.org/packages/b6/ae/315bbeee126a769cbde43cf4908acb4b40408d8bf8bbf334dd7368d8dadf/pycparser-3.12-py3-none-any.whl", using: :nounzip
     sha256 "a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e"
@@ -110,6 +115,11 @@ class Anymessage < Formula
   resource "pyjwt" do
     url "https://files.pythonhosted.org/packages/50/ca/44de4e75f8aadc457f0634be3b542815078ded46dca30efb960edeecad6e/pyjwt-2.15.1-py3-none-any.whl", using: :nounzip
     sha256 "42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193"
+  end
+
+  resource "pypdf" do
+    url "https://files.pythonhosted.org/packages/8a/21/e83122a25e334c718a4da67004fa94acd7215fe9f8e63a9d7c7f979eb52b/pypdf-7.0.0-py3-none-any.whl", using: :nounzip
+    sha256 "112a2c7cbabefd8dfe498f7a13977e575e762d58cdb0d832acb8886922602c6f"
   end
 
   resource "python-dotenv" do
@@ -190,11 +200,14 @@ class Anymessage < Formula
     assert_match version.to_s, shell_output("#{bin}/anymessage --version")
     doctor = JSON.parse(shell_output("#{bin}/anymessage doctor --json", 1))
     assert_equal false, doctor.fetch("ready")
+    assert_equal "data_missing", doctor.fetch("source").fetch("state")
     config = JSON.parse(shell_output("#{bin}/anymessage mcp config --format json"))
     assert_equal ["mcp"], config.fetch("mcpServers").fetch("AnyMessage").fetch("args")
     system libexec/"bin/python", "-c", <<~PYTHON, bin/"anymessage"
       import asyncio
       import sys
+      import pypdf
+      from PIL import Image
       from mcp import ClientSession, StdioServerParameters
       from mcp.client.stdio import stdio_client
 
@@ -203,7 +216,8 @@ class Anymessage < Formula
               async with ClientSession(read, write) as session:
                   await session.initialize()
                   tools = await session.list_tools()
-                  assert {tool.name for tool in tools.tools} == {"status", "list_conversations", "get_messages", "search_messages"}
+                  assert {tool.name for tool in tools.tools} == {"status", "list_conversations", "get_messages", "search_messages", "list_attachments", "read_attachment"}
+                  assert all(tool.annotations and tool.annotations.readOnlyHint and tool.annotations.openWorldHint is False for tool in tools.tools)
                   result = await session.call_tool("status", {})
                   assert not result.isError
 
