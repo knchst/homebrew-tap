@@ -13,6 +13,8 @@ The demo calls MCP tools against temporary fictional data without WeChat, accoun
 
 The MCP server exposes read-only message search and attachment access through six tools: `status`, `list_conversations`, `get_messages`, `search_messages`, `list_attachments`, and `read_attachment`.
 
+Use `search_messages` to search 1–8 selected chats with optional UTC Unix-second date bounds. `start_time` is inclusive and `end_time` is exclusive.
+
 Attachment reads use locally cached files only. They extract text from PDF, DOCX, XLSX, PPTX, and Unicode text files and return supported JPEG, PNG, GIF, and WebP images. They do not run OCR or download attachments from the network.
 
 To print an MCP client configuration without changing a client file, run `anymessage mcp config --format json`. For client setup and privacy details, see the [AnyMessage documentation](https://github.com/knchst/AnyMessage).
@@ -22,7 +24,7 @@ To print an MCP client configuration without changing a client file, run `anymes
 Generate the formula from the release wheel and the matching `uv.lock` using Python 3.11 or later.
 
 ```sh
-python3 scripts/generate_formula.py --lock /path/to/uv.lock --wheel /path/to/anymessage-0.4.0-py3-none-any.whl
+python3 scripts/generate_formula.py --lock /path/to/uv.lock --wheel /path/to/anymessage-0.5.0-py3-none-any.whl
 ```
 
 The generator checks each wheel URL and checksum against PyPI and the lock. Publish the release wheel at the URL in the formula before installing it. The GitHub Actions workflow uses a macOS 26 runner to link the checkout as a tap, install the formula, and run `brew test`.
