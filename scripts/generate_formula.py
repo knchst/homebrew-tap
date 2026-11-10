@@ -150,6 +150,11 @@ out += '''  def install
     ENV.delete("ANYMESSAGE_SQLCIPHER")
     ENV.prepend_path "PATH", bin
     assert_match version.to_s, shell_output("#{bin}/anymessage --version")
+    demo = shell_output("#{bin}/anymessage demo")
+    assert_match "Dataset: synthetic. Reader: ready.", demo
+    assert_match "Content verified: True.", demo
+    assert_match "attachment_missing | cache_file_unavailable", demo
+    assert_match "Incomplete: True.", demo
     doctor = JSON.parse(shell_output("#{bin}/anymessage doctor --json", 1))
     assert_equal false, doctor.fetch("ready")
     assert_equal "data_missing", doctor.fetch("source").fetch("state")
