@@ -3,8 +3,8 @@ class Anymessage < Formula
 
   desc "Read-only local messaging MCP server"
   homepage "https://github.com/knchst/AnyMessage"
-  url "https://github.com/knchst/AnyMessage/releases/download/v0.3.1/anymessage-0.3.1-py3-none-any.whl", using: :nounzip
-  sha256 "bdabaa18af1d13545a059ecffadab2e37a201dad6124007ca53d003514482d90"
+  url "https://github.com/knchst/AnyMessage/releases/download/v0.4.0/anymessage-0.4.0-py3-none-any.whl", using: :nounzip
+  sha256 "ea33e4ef8e66a664d3ed873566bfd3a9f3aa3bd42271cc5724d647152c0e0da4"
   license "MIT"
 
   depends_on macos: :sonoma
@@ -198,6 +198,11 @@ class Anymessage < Formula
     ENV.delete("ANYMESSAGE_SQLCIPHER")
     ENV.prepend_path "PATH", bin
     assert_match version.to_s, shell_output("#{bin}/anymessage --version")
+    demo = shell_output("#{bin}/anymessage demo")
+    assert_match "Dataset: synthetic. Reader: ready.", demo
+    assert_match "Content verified: True.", demo
+    assert_match "attachment_missing | cache_file_unavailable", demo
+    assert_match "Incomplete: True.", demo
     doctor = JSON.parse(shell_output("#{bin}/anymessage doctor --json", 1))
     assert_equal false, doctor.fetch("ready")
     assert_equal "data_missing", doctor.fetch("source").fetch("state")
