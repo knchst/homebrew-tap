@@ -3,8 +3,8 @@ class Anymessage < Formula
 
   desc "Read-only local messaging MCP server"
   homepage "https://github.com/knchst/AnyMessage"
-  url "https://github.com/knchst/AnyMessage/releases/download/v0.5.0/anymessage-0.5.0-py3-none-any.whl", using: :nounzip
-  sha256 "a31403d0fe7f60a2b1acfe0f9e8347c2ba1dbecd364bd267a7107aab9dcdb6c7"
+  url "https://github.com/knchst/AnyMessage/releases/download/v0.6.0/anymessage-0.6.0-py3-none-any.whl", using: :nounzip
+  sha256 "9c00a6cf196e5718874d0012081b77b5f1adccb908de04157d1de92b81d7f9a6"
   license "MIT"
 
   depends_on macos: :sonoma
@@ -222,10 +222,32 @@ class Anymessage < Formula
               async with ClientSession(read, write) as session:
                   await session.initialize()
                   tools = await session.list_tools()
-                  assert {tool.name for tool in tools.tools} == {"status", "list_conversations", "get_messages", "search_messages", "list_attachments", "read_attachment"}
+                  assert {tool.name for tool in tools.tools} == {"status", "list_conversations", "get_messages", "get_message_context", "search_messages", "list_attachments", "read_attachment"}
                   assert all(tool.annotations and tool.annotations.readOnlyHint and tool.annotations.openWorldHint is False for tool in tools.tools)
                   result = await session.call_tool("status", {})
                   assert not result.isError
+          async with stdio_client(StdioServerParameters(command=sys.argv[1], args=["demo", "--mcp"])) as (read, write):
+              async with ClientSession(read, write) as session:
+                  await session.initialize()
+                  search = await session.call_tool("search_messages", {"query": "500", "conversation_ids": ["atlas-demo@chatroom", "atlas-supplier-demo@chatroom"], "start_time": 1794182400, "end_time": 1794268800})
+                  assert not search.isError
+                  evidence = search.structuredContent
+                  assert len(evidence["items"]) == 3 and evidence["scanned"] == 9
+                  proposal = next(item for item in evidence["items"] if item["conversation_id"] == "atlas-demo@chatroom" and (item["text"] or "").startswith("Proposal:"))
+                  context = await session.call_tool("get_message_context", {"conversation_id": proposal["conversation_id"], "message_id": proposal["id"], "before": 1, "after": 2})
+                  assert not context.isError
+                  neighborhood = context.structuredContent
+                  assert neighborhood["anchor_index"] == 1
+                  assert [item["id"] for item in neighborhood["items"]] == [f"message/message_0.db:{index}" for index in range(1, 5)]
+                  assert neighborhood["items"][1]["id"] == proposal["id"]
+                  assert neighborhood["items"][1]["conversation_id"] == proposal["conversation_id"]
+                  approval = neighborhood["items"][2]
+                  assert approval["sender_id"] == "Maya" and approval["text"].startswith("Approved:")
+                  specification = neighborhood["items"][3]
+                  attachment = specification["attachments"][0]
+                  assert attachment["display_name"] == "atlas-spec-v2.txt"
+                  content = await session.call_tool("read_attachment", {"conversation_id": specification["conversation_id"], "message_id": specification["id"], "attachment_id": attachment["id"]})
+                  assert not content.isError and content.structuredContent["content_verified"]
 
       asyncio.run(asyncio.wait_for(check(), timeout=30))
     PYTHON
