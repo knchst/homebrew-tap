@@ -152,6 +152,7 @@ out += '''  def install
     assert_match version.to_s, shell_output("#{bin}/anymessage --version")
     demo = shell_output("#{bin}/anymessage demo")
     assert_match "Dataset: synthetic. Reader: ready.", demo
+    assert_match "3 matches in 9 scanned messages", demo
     assert_match "Content verified: True.", demo
     assert_match "attachment_missing | cache_file_unavailable", demo
     assert_match "Incomplete: True.", demo
